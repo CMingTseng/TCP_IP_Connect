@@ -18,7 +18,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class android_test extends Activity {
+public class ClientActivity extends Activity {
 	public static Handler mHandler = new Handler();
 
     @Override
@@ -38,23 +38,23 @@ public class android_test extends Activity {
 
 		}
     	super.onStop();
-    	
+
     }
     Button calcbutton_ECG;
     private Button transmit;
     private TextView txtb_ID;
-    private TextView txtb_PSWD;    
-    private Socket clientSocket =null;
+	private TextView txtb_PSWD;
+	private Socket clientSocket =null;
     private String s="";
     private EditText edittb_server;
     private EditText edittb_ECG_port;
     private EditText edittb_message;
     private EditText edittb_accept;
-    String tmp;	
-    ServerSocket serverSocket;
+	String tmp;
+	ServerSocket serverSocket;
     int serverPort;
-    
-    private void findViews(){
+
+	private void findViews(){
     	calcbutton_ECG = (Button)findViewById(R.id.submit);
     	transmit = (Button)findViewById(R.id.transmit);
     	edittb_server = (EditText)findViewById(R.id.server);
@@ -81,8 +81,8 @@ public class android_test extends Activity {
     		      s += edittb_server.getText().toString() + " ";
     		      s += "SERVER_PORT=" ;
     		      s += edittb_ECG_port.getText().toString();
-    		      Toast.makeText(android_test.this, s, Toast.LENGTH_SHORT).show();
-                  SendData();
+					Toast.makeText(ClientActivity.this, s, Toast.LENGTH_SHORT).show();
+					SendData();
                   try{
                   	  Thread.currentThread().sleep(10);//sleep for 1000 ms
                 	}

@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.demo.client">
 
     <application android:icon="@drawable/icon" android:label="Clinet_test">
-        <activity android:name="com.demo.client.android_test"
+        <activity
+            android:name="com.demo.client.ClientActivity"
                   android:label="Clinet_test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
