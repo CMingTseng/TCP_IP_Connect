@@ -12,6 +12,8 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import static android.R.attr.port;
+
 
 public class TCPServerThread extends Thread {
     private static final String TAG = "TCPServerThread";
@@ -28,17 +30,6 @@ public class TCPServerThread extends Thread {
     public TCPServerThread(Handler handler, int port) {
         this.mHandler = handler;
         this.mPort = port;
-        try {
-            mServerSocket = new ServerSocket(port); // 建立 mServerSocket
-            Log.v(TAG, "ServerSocket start at port : " + port);
-            mServerSocket.setReceiveBufferSize(BUFF_SIZE);
-            mServerSocket.setReuseAddress(true);
-        } catch (IOException e) {
-            Message msg = handler.obtainMessage(C.MSG_SERVER_START_ERROR);
-            msg.obj = "ServerSocket MSG_SERVER_START_ERROR";
-            msg.sendToTarget();
-            e.printStackTrace();
-        }
     }
 
     //將資料傳入 mClient 端
@@ -51,6 +42,10 @@ public class TCPServerThread extends Thread {
     @Override
     public void run() {
         try {
+            mServerSocket = new ServerSocket(port); // 建立 mServerSocket
+            Log.v(TAG, "ServerSocket start at port : " + port);
+            mServerSocket.setReceiveBufferSize(BUFF_SIZE);
+            mServerSocket.setReuseAddress(true);
             mClient = mServerSocket.accept(); // 接受  mClient 端的連線要求
             Log.v(TAG, "ServerSocket a Client come~~~");
             BufferedReader br = new BufferedReader(new InputStreamReader(mClient.getInputStream()));
@@ -61,11 +56,9 @@ public class TCPServerThread extends Thread {
                     // 收到空字串時判定為斷線
                     if (mMsg == null)
                         break;
-
                     // 輸出訊息
                     System.out.println(mMsg);
-                    // 將訊息 mesg (屬於 AndroidTCPServerActivity.RECEIVEDATA 的訊息;內含 mMsg)
-                    // 傳入 msgHandler
+                    // 將訊息 mesg (屬於 C.RECEIVEDATA 的訊息;內含 mMsg)傳入 msgHandler
                     //Way 1:
 //                    Message mesg = mHandler.obtainMessage(C.RECEIVEDATA);
 //                    mesg.obj = mMsg;
@@ -77,6 +70,9 @@ public class TCPServerThread extends Thread {
                 }
             }
         } catch (IOException e) {
+            Message msg = mHandler.obtainMessage(C.MSG_SERVER_START_ERROR);
+            msg.obj = "ServerSocket MSG_SERVER_START_ERROR";
+            msg.sendToTarget();
             e.printStackTrace();
             return;
         }
