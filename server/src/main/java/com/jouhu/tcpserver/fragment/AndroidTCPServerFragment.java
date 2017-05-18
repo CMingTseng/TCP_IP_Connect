@@ -1,17 +1,24 @@
-package com.jouhu.tcpserver;
+package com.jouhu.tcpserver.fragment;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.jouhu.tcpserver.C;
+import com.jouhu.tcpserver.R;
+import com.jouhu.tcpserver.TCPServerThread;
+
 import java.io.IOException;
 
-public class AndroidTCPServerActivity extends Activity {
-    private static final String TAG = "AndroidTCPServerActivity";
+public class AndroidTCPServerFragment extends Fragment {
+    private static final String TAG = "AndroidTCPServerFragment";
     private static final int PORT = 4444;
     private TCPServerThread mSocketServer = null;
     private EditText mMessageInfo;
@@ -32,13 +39,13 @@ public class AndroidTCPServerActivity extends Activity {
     };
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final Context context = container.getContext();
         mSocketServer = new TCPServerThread(mMsgHandler, PORT);
         mSocketServer.start();
-        final Button transmit = (Button) findViewById(R.id.transmit);
-        final EditText transmitData = (EditText) findViewById(R.id.transmit_data);
+        final View root = inflater.inflate(R.layout.main_fragment, container, false);
+        final Button transmit = (Button) root.findViewById(R.id.transmit);
+        final EditText transmitData = (EditText) root.findViewById(R.id.transmit_data);
         transmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,13 +56,13 @@ public class AndroidTCPServerActivity extends Activity {
                 }
             }
         });
-        mMessageInfo = (EditText) findViewById(R.id.editText1);
-
+        mMessageInfo = (EditText) root.findViewById(R.id.editText1);
         mMessageInfo.setText("Server Start At Port " + String.valueOf(PORT));
+        return root;
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         try {
             if (mSocketServer.mClient != null && mSocketServer.mClient.isConnected()) {
