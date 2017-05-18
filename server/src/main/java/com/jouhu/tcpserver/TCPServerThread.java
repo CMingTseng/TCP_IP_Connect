@@ -1,92 +1,78 @@
 package com.jouhu.tcpserver;
 
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-
 
 public class TCPServerThread extends Thread {
-    private static final String tag = "TCPServerThread";
-    private Handler handler = null;
+    private static final String TAG = "TCPServerThread";
+    private Handler mHandler = null;
     //100K
     private static final int BUFF_SIZE = 1024 * 100;
-    public ServerSocket sock = null;
+    public ServerSocket mServerSocket = null;
     private boolean running = false;
-    private int port;
-    private Context context = null;
+    private int mPort;
     private byte[] jpegHeader = null;
-    public Socket client;
+    public Socket mClient;
+    private String mMsg;
 
-    public TCPServerThread(Handler handler,int port,Context context)
-    {
-        this.handler = handler;
-        this.port = port;
-        this.context = context;
-
+    public TCPServerThread(Handler handler, int port) {
+        this.mHandler = handler;
+        this.mPort = port;
         try {
-            sock = new ServerSocket(port); // 建立 sock 
-            Log.v(tag, "ServerSocket start at port");
-            sock.setReceiveBufferSize(BUFF_SIZE);
-            sock.setReuseAddress(true);
-
+            mServerSocket = new ServerSocket(port); // 建立 mServerSocket
+            Log.v(TAG, "ServerSocket start at port : " + port);
+            mServerSocket.setReceiveBufferSize(BUFF_SIZE);
+            mServerSocket.setReuseAddress(true);
         } catch (IOException e) {
-            Message msg = handler.obtainMessage(AndroidTCPServerActivity.MSG_SERVER_START_ERROR);
+            Message msg = handler.obtainMessage(C.MSG_SERVER_START_ERROR);
             msg.obj = "ServerSocket MSG_SERVER_START_ERROR";
             msg.sendToTarget();
             e.printStackTrace();
         }
     }
-    //將資料傳入 client 端
-    public void writeData(String buff) throws IOException
-    {
-        BufferedWriter out=	new BufferedWriter( new OutputStreamWriter(client.getOutputStream()));
+
+    //將資料傳入 mClient 端
+    public void writeData(String buff) throws IOException {
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(mClient.getOutputStream()));
         out.write(buff);
         out.flush();
     }
 
-    private String msg;
-    public void run()
-    {
+    @Override
+    public void run() {
         try {
-            client = sock.accept(); // 接受  client 端的連線要求
-            Log.v(tag, "ServerSocket a client come~~~");
-            //InputStream is = client.getInputStream();
-        	BufferedReader br = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            mClient = mServerSocket.accept(); // 接受  mClient 端的連線要求
+            Log.v(TAG, "ServerSocket a Client come~~~");
+            BufferedReader br = new BufferedReader(new InputStreamReader(mClient.getInputStream()));
             running = true;
-            while(running)
-            {
-                try
-                {
-                	msg= br.readLine(); // 將 client 端傳來的資料,由輸入緩衝器讀入
-					//mHandler.obtainMessage(ServerSocket_android_demo.MESSAGE_READ, msg.length(), -1, msg);
-					
-					// 收到空字串時判定為斷線
-					if (msg==null)
-						break;
-					
-					// 輸出訊息 
-					System.out.println(msg);
-					// 將訊息 mesg (屬於 AndroidTCPServerActivity.RECEIVEDATA 的訊息;內含 msg)
-					// 傳入 msgHandler 
-					Message mesg = handler.obtainMessage(AndroidTCPServerActivity.RECEIVEDATA);
-					mesg.obj = msg;
-					mesg.sendToTarget();
-                }
-                catch(Exception e)
-                {
+            while (running) {
+                try {
+                    mMsg = br.readLine(); // 將 mClient 端傳來的資料,由輸入緩衝器讀入
+                    // 收到空字串時判定為斷線
+                    if (mMsg == null)
+                        break;
+
+                    // 輸出訊息
+                    System.out.println(mMsg);
+                    // 將訊息 mesg (屬於 AndroidTCPServerActivity.RECEIVEDATA 的訊息;內含 mMsg)
+                    // 傳入 msgHandler
+                    //Way 1:
+//                    Message mesg = mHandler.obtainMessage(C.RECEIVEDATA);
+//                    mesg.obj = mMsg;
+                    //Way 2:
+                    Message mesg = mHandler.obtainMessage(C.RECEIVEDATA, mMsg.length(), -1, mMsg);
+                    mesg.sendToTarget();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
