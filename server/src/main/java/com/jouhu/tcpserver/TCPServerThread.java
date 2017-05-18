@@ -42,7 +42,7 @@ public class TCPServerThread extends Thread {
     @Override
     public void run() {
         try {
-            mServerSocket = new ServerSocket(port); // 建立 mServerSocket
+            mServerSocket = new ServerSocket(mPort); // 建立 mServerSocket
             Log.v(TAG, "ServerSocket start at port : " + port);
             mServerSocket.setReceiveBufferSize(BUFF_SIZE);
             mServerSocket.setReuseAddress(true);
